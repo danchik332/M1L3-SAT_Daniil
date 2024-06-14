@@ -23,4 +23,28 @@ def ban_user(message):
     else:
         bot.reply_to(message, "Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите забанить.")
 
+
+@bot.message_handler(func=lambda message: "https://" in message.text)
+def ban_user_with_link(message):
+    # сохранить информацию о пользователе 
+    user_id = message.from_user.id
+    username = message.from_user.username
+    first_name = message.from_user.first_name
+    last_name = message.from_user.last_name
+    
+    # забанить пользователя
+    bot.send_message(user_id, "You are banned for posting links.")
+    bot.kick_chat_member(message.chat.id, user_id)
+    
+    # Сохраняйте информацию о запрещенных пользователях для ознакомления
+    with open("banned_users.txt", "a") as file:
+        file.write(f"User ID: {user_id}, Username: {username}, First Name: {first_name}, Last Name: {last_name}n")
+
+        
+
+@bot.message_handler(content_types=['new_chat_members'])
+def make_some(message):
+    bot.send_message(message.chat.id, 'I accepted a new user!')
+    bot.approve_chat_join_request(message.chat.id, message.from_user.id)
+
 bot.infinity_polling(none_stop=True)
